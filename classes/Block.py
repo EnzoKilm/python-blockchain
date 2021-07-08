@@ -1,19 +1,26 @@
 import json
 import os
+import shutil
+import hashlib
 
 
 class Block:
     def __init__(self, base_hash, new_hash, parent_hash):
-        self.base_hash = base_hash
-        self.hash = new_hash
-        self.parent_hash = parent_hash
-        self.transactions = []
+        if self.check_hash(base_hash, new_hash):
+            self.base_hash = base_hash
+            self.hash = new_hash
+            self.parent_hash = parent_hash
+            self.transactions = []
+        else:
+            return False
 
-    def check_hash(self):
-        pass
+    def check_hash(self, base_hash, new_hash):
+        test_hash = hashlib.sha256(base_hash.encode()).hexdigest()
+        return new_hash == test_hash
 
-    def add_transaction(self):
-        pass
+    def add_transaction(self, transaction):
+        self.transactions.append(transaction)
+        return self.save()
 
     def get_transaction(self):
         pass
@@ -32,8 +39,20 @@ class Block:
         for t in self.transactions:
             data['transactions'].append(t)
 
-        with open(f"./content/blocs/{self.hash}.json", "w") as file:
+        main_file = f"./content/blocs/{self.hash}.json"
+        backup_file = f"./content/blocs/{self.hash}_backup.json"
+        shutil.copyfile(main_file, backup_file)
+        os.system(f"attrib +h {backup_file}")
+        with open(main_file, "w") as file:
             json.dump(data, file)
+
+        if self.get_weight() >= 256000:
+            os.remove(main_file)
+            os.rename(backup_file, main_file)
+            os.system(f"attrib -h {main_file}")
+            return "The file exceed the maximum authorized length"
+        else:
+            return True
 
     def load(self):
         with open(f"./content/blocs/{self.hash}.json") as file:
