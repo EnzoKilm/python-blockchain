@@ -6,24 +6,26 @@ import hashlib
 
 class Block:
     def __init__(self, base_hash, new_hash, parent_hash):
-        if self.check_hash(base_hash, new_hash):
-            self.base_hash = base_hash
-            self.hash = new_hash
-            self.parent_hash = parent_hash
-            self.transactions = []
-        else:
+        self.base_hash = base_hash
+        self.hash = new_hash
+        self.parent_hash = parent_hash
+        self.transactions = []
+        if self.check_hash(base_hash, new_hash) is False:
             return False
 
-    def check_hash(self, base_hash, new_hash):
-        test_hash = hashlib.sha256(base_hash.encode()).hexdigest()
-        return new_hash == test_hash
+    def check_hash(self):
+        test_hash = hashlib.sha256(self.base_hash.encode()).hexdigest()
+        return self.hash == test_hash
 
     def add_transaction(self, transaction):
         self.transactions.append(transaction)
         return self.save()
 
-    def get_transaction(self):
-        pass
+    def get_transaction(self, number):
+        for t in self.transactions:
+            if t.number == number:
+                return t
+        return None
 
     def get_weight(self):
         return os.path.getsize(f"./content/blocs/{self.hash}.json")

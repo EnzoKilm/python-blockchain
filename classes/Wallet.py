@@ -1,8 +1,6 @@
 import uuid
 import os
 import json
-from Chain import Chain
-import datetime
 
 
 class Wallet:
@@ -28,35 +26,21 @@ class Wallet:
 
     def add_balance(self, transaction):
         self.balance += transaction["value"]
-        self.history.append({
-            'type': 'receive',
-            'amount': transaction["value"],
-            'transmitter': transaction["transmitter_uuid"],
-            'receiver': self.unique_id,
-            'date': transaction["date"],
-            'transaction': transaction["number"]
-        })
+        self.send(transaction)
 
     def sub_balance(self, transaction):
         self.balance -= transaction["value"]
+        self.send(transaction)
+
+    def send(self, transaction):
         self.history.append({
             'type': 'send',
             'amount': transaction["value"],
-            'transmitter': self.unique_id,
+            'transmitter': transaction["transmitter_uuid"],
             'receiver': transaction["receiver_uuid"],
             'date': transaction["date"],
             'transaction': transaction["number"]
         })
-
-    def send(self, receiver_uuid, amount):
-        if self.balance >= amount:
-            date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-            if Chain.add_transaction(self.unique_id, receiver_uuid, amount, date):
-                return f"You have successfully sent {amount} tokens to {receiver_uuid}"
-            else:
-                return "Something wrong happened, try again later."
-        else:
-            return "You don't have enough balance for this transaction."
 
     def save(self):
         data = {

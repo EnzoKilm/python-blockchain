@@ -1,9 +1,10 @@
 import hashlib
 import string
 import random
-from Block import Block
-from Wallet import Wallet
+from .Block import Block
+from .Wallet import Wallet
 import sys
+import datetime
 
 
 class Chain:
@@ -13,7 +14,7 @@ class Chain:
 
     def generate_hash(self):
         letters = string.ascii_lowercase
-        index = random.randint(1, 51)
+        index = random.randint(1, 101)
 
         random_string = ''
         for i in range(index):
@@ -60,37 +61,42 @@ class Chain:
 
         return None
 
-    def add_transaction(self, transmitter_uuid, receiver_uuid, amount, date):
+    def add_transaction(self, transmitter_uuid, receiver_uuid, amount):
+        date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
         transmitter = Wallet(transmitter_uuid)
         if transmitter is not False:
             receiver = Wallet(receiver_uuid)
-            if receiver is not False:
-                last_block = self.blocks[len(self.blocks) - 1]
 
-                transaction = {
-                    'number': self.last_transaction_number + 1,
-                    'transmitter': transmitter_uuid,
-                    'receiver': receiver_uuid,
-                    'amount': amount,
-                    'date': date
-                }
-                if sys.getsizeof(transaction) + last_block.get_weight() <= 256000:
-                    result = last_block.add_transaction(transaction)
-                    if result is not True:
-                        return False
+            if receiver.balance >= amount:
+                if receiver is not False:
+                    last_block = self.blocks[len(self.blocks) - 1]
+
+                    transaction = {
+                        'number': self.last_transaction_number + 1,
+                        'transmitter': transmitter_uuid,
+                        'receiver': receiver_uuid,
+                        'amount': amount,
+                        'date': date
+                    }
+                    if sys.getsizeof(transaction) + last_block.get_weight() <= 256000:
+                        result = last_block.add_transaction(transaction)
+                        if result is not True:
+                            return "Something wrong happened, try again later."
+                        else:
+                            transmitter.sub_balance(transaction)
+                            receiver.add_balance(transaction)
+                            self.last_transaction_number += 1
+                            return True
                     else:
-                        transmitter.sub_balance(transaction)
-                        receiver.add_balance(transaction)
-                        self.last_transaction_number += 1
-                        return True
-                else:
-                    return False
+                        return "Receiver doesn't exist."
+            else:
+                return "Transmitter doesn't have enough balance for this transaction."
 
     def find_transaction(self, number):
         for b in self.blocks:
-            for t in b.transactions:
-                if t.number == number:
-                    return b
+            if b.get_transaction(number) is not None:
+                return b
 
         return None
 
