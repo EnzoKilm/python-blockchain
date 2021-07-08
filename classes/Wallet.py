@@ -40,3 +40,10 @@ class Wallet:
 
         with open(f"./content/wallets/{self.unique_id}.json", "w") as file:
             json.dump(data, file)
+
+    def load(self):
+        with open(f"./content/wallets/{self.unique_id}.json") as file:
+            data = json.load(file)
+            self.unique_id = data["unique_id"]
+            self.balance = data["balance"]
+            self.history = data["history"]
