@@ -28,11 +28,11 @@ class Chain:
             else:
                 return "Block successfully created."
         else:
-            self.generate_hash()
+            return self.generate_hash()
 
     def verify_hash(self, hash_to_verify):
-        # if not hash_to_verify.startswith("0000"):
-        #     return False
+        if not hash_to_verify.startswith("0"):
+            return False
 
         for b in self.blocks:
             if b.hash == hash_to_verify:

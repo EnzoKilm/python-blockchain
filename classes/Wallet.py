@@ -24,15 +24,15 @@ class Wallet:
 
     def add_balance(self, transaction):
         self.balance += transaction["amount"]
-        self.send(transaction)
+        self.send(transaction, "receive")
 
     def sub_balance(self, transaction):
         self.balance -= transaction["amount"]
-        self.send(transaction)
+        self.send(transaction, "send")
 
-    def send(self, transaction):
+    def send(self, transaction, transaction_type):
         self.history.append({
-            'type': 'send',
+            'type': transaction_type,
             'amount': transaction["amount"],
             'emitter': transaction["emitter"],
             'receiver': transaction["receiver"],
