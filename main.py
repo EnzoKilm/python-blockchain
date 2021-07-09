@@ -23,6 +23,6 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(50000)
+    sys.setrecursionlimit(100000)
 
     main()

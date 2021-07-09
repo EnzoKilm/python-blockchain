@@ -66,9 +66,8 @@ class Chain:
 
         transmitter = Wallet(transmitter_uuid)
         if transmitter is not False:
-            receiver = Wallet(receiver_uuid)
-
-            if receiver.balance >= amount:
+            if transmitter.balance >= amount:
+                receiver = Wallet(receiver_uuid)
                 if receiver is not False:
                     last_block = self.blocks[len(self.blocks) - 1]
 
