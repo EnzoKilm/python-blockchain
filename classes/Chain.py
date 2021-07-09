@@ -4,7 +4,7 @@ import random
 from .Block import Block
 from .Wallet import Wallet
 import sys
-import datetime
+from datetime import datetime
 
 
 class Chain:
@@ -13,7 +13,7 @@ class Chain:
         self.last_transaction_number = 0
 
     def generate_hash(self):
-        letters = string.ascii_lowercase
+        letters = string.printable
         index = random.randint(1, 101)
 
         random_string = ''
@@ -31,8 +31,8 @@ class Chain:
             self.generate_hash()
 
     def verify_hash(self, hash_to_verify):
-        if hash_to_verify[0:4] != "0000":
-            return False
+        # if not hash_to_verify.startswith("0000"):
+        #     return False
 
         for b in self.blocks:
             if b.hash == hash_to_verify:
@@ -61,19 +61,19 @@ class Chain:
 
         return None
 
-    def add_transaction(self, transmitter_uuid, receiver_uuid, amount):
+    def add_transaction(self, emitter_uuid, receiver_uuid, amount):
         date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-        transmitter = Wallet(transmitter_uuid)
-        if transmitter is not False:
-            if transmitter.balance >= amount:
+        emitter = Wallet(emitter_uuid)
+        if emitter is not False:
+            if emitter.balance >= amount:
                 receiver = Wallet(receiver_uuid)
                 if receiver is not False:
                     last_block = self.blocks[len(self.blocks) - 1]
 
                     transaction = {
                         'number': self.last_transaction_number + 1,
-                        'transmitter': transmitter_uuid,
+                        'emitter': emitter_uuid,
                         'receiver': receiver_uuid,
                         'amount': amount,
                         'date': date
@@ -83,14 +83,14 @@ class Chain:
                         if result is not True:
                             return "Something wrong happened, try again later."
                         else:
-                            transmitter.sub_balance(transaction)
+                            emitter.sub_balance(transaction)
                             receiver.add_balance(transaction)
                             self.last_transaction_number += 1
                             return True
                     else:
                         return "Receiver doesn't exist."
             else:
-                return "Transmitter doesn't have enough balance for this transaction."
+                return "emitter doesn't have enough balance for this transaction."
 
     def find_transaction(self, number):
         for b in self.blocks:

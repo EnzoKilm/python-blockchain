@@ -9,38 +9,37 @@ class Wallet:
             self.unique_id = self.generate_unique_id()
             self.balance = 100
             self.history = []
+            self.save()
         else:
             self.unique_id = unique_id
-            if self.load() is False:
-                return False
+            self.load()
 
     def generate_unique_id(self):
-        wallet_uuid = uuid.uuid4()
+        wallet_uuid = str(uuid.uuid4())
 
         if os.path.exists(f"./content/wallets/{wallet_uuid}.json"):
             return self.generate_unique_id()
-        else:
-            self.save()
 
-            return wallet_uuid
+        return wallet_uuid
 
     def add_balance(self, transaction):
-        self.balance += transaction["value"]
+        self.balance += transaction["amount"]
         self.send(transaction)
 
     def sub_balance(self, transaction):
-        self.balance -= transaction["value"]
+        self.balance -= transaction["amount"]
         self.send(transaction)
 
     def send(self, transaction):
         self.history.append({
             'type': 'send',
-            'amount': transaction["value"],
-            'transmitter': transaction["transmitter_uuid"],
-            'receiver': transaction["receiver_uuid"],
+            'amount': transaction["amount"],
+            'emitter': transaction["emitter"],
+            'receiver': transaction["receiver"],
             'date': transaction["date"],
             'transaction': transaction["number"]
         })
+        self.save()
 
     def save(self):
         data = {

@@ -10,8 +10,10 @@ class Block:
         self.hash = new_hash
         self.parent_hash = parent_hash
         self.transactions = []
-        if self.check_hash(base_hash, new_hash) is False:
-            return False
+        self.check_hash()
+
+    def __str__(self):
+        return f"base_hash: {self.base_hash}\nhash: {self.hash}\nparent_hash: {self.parent_hash}\ntransactions: {self.transactions}"
 
     def check_hash(self):
         test_hash = hashlib.sha256(self.base_hash.encode()).hexdigest()
@@ -23,7 +25,7 @@ class Block:
 
     def get_transaction(self, number):
         for t in self.transactions:
-            if t.number == number:
+            if t["number"] == number:
                 return t
         return None
 
@@ -41,19 +43,26 @@ class Block:
         for t in self.transactions:
             data['transactions'].append(t)
 
-        main_file = f"./content/blocs/{self.hash}.json"
-        backup_file = f"./content/blocs/{self.hash}_backup.json"
-        shutil.copyfile(main_file, backup_file)
-        os.system(f"attrib +h {backup_file}")
-        with open(main_file, "w") as file:
-            json.dump(data, file)
+        if os.path.exists(f"./content/blocs/{self.hash}.json"):
+            main_file = r"./content/blocs/"+self.hash+".json"
+            backup_file = r"./content/blocs/"+self.hash+"_backup.json"
+            shutil.copyfile(main_file, f"./content/blocs/{self.hash}_backup.json")
+            os.system(f"attrib +h {backup_file}")
+            with open(main_file, "w") as file:
+                json.dump(data, file)
 
-        if self.get_weight() >= 256000:
-            os.remove(main_file)
-            os.rename(backup_file, main_file)
-            os.system(f"attrib -h {main_file}")
-            return "The file exceed the maximum authorized length"
+            if self.get_weight() >= 256000:
+                os.remove(main_file)
+                os.rename(backup_file, main_file)
+                os.system(f"attrib -h {main_file}")
+                return "The file exceed the maximum authorized length"
+            else:
+                os.remove(backup_file)
+                return True
         else:
+            main_file = f"./content/blocs/{self.hash}.json"
+            with open(main_file, "w") as file:
+                json.dump(data, file)
             return True
 
     def load(self):
