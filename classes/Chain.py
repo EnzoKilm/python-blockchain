@@ -1,10 +1,22 @@
 import hashlib
-import string
-import random
 from .Block import Block
 from .Wallet import Wallet
 import sys
 from datetime import datetime
+import settings.settings
+import os
+
+
+def check_tokens_in_chain(amount_to_add):
+    total = amount_to_add
+    for wallet_id in os.listdir("./content/wallets/"):
+        wallet_object = Wallet(wallet_id.replace(".json", ""))
+        total += wallet_object.balance
+
+    if total > settings.settings.MAX_TOKEN_NUMBER:
+        return False
+    else:
+        return True
 
 
 class Chain:
@@ -12,28 +24,9 @@ class Chain:
         self.blocks = []
         self.last_transaction_number = 0
 
-    def generate_hash(self):
-        """ OLD HASH GENERATION METHOD """
-        # letters = string.printable
-        # index = random.randint(1, 101)
-        #
-        # random_string = ''
-        # for i in range(index):
-        #     random_string = random_string.join(random.choice(letters))
-        #
-        # new_hash = hashlib.sha256(random_string.encode()).hexdigest()
-        #
-        # if self.verify_hash(new_hash):
-        #     if self.add_block(random_string, new_hash) is False:
-        #         return "The hash does not match to the string given."
-        #     else:
-        #         return "Block successfully created."
-        # else:
-        #     return self.generate_hash()
+    def generate_hash(self, miner=None):
+        print("\nSearching for a new hash")
 
-        print("Searching for a new hash")
-
-        """ NEW HASH GENERATION METHOD """
         index = 0
         new_hash = hashlib.sha256(str(index).encode()).hexdigest()
         while not new_hash.startswith("0000"):
@@ -45,7 +38,22 @@ class Chain:
                     if self.add_block(str(index), new_hash) is False:
                         return "The hash does not match to the string given."
                     else:
-                        return "Block successfully created."
+                        if miner is not None:
+                            if check_tokens_in_chain(50):
+                                transaction = {
+                                    'number': self.last_transaction_number + 1,
+                                    'emitter': 'Blockchain',
+                                    'receiver': miner.unique_id,
+                                    'amount': 50,
+                                    'date': datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                                }
+                                miner.add_balance(transaction)
+                                self.last_transaction_number += 1
+                                return "Block successfully created.\nMiner got 50 tokens as a reward."
+                            else:
+                                return "Block successfully created.\nNo reward given to the miner, max token number in the chain is reached."
+                        else:
+                            return "Block successfully created."
                 else:
                     new_hash = ""
 
