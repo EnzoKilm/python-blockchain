@@ -27,6 +27,9 @@ def main():
     print(result)
     print(f"New wallet 2 balance: {wallet_2.balance}")
 
+    print(f"\nFirst block of the chain :\n{chain.get_block(chain.blocks[0].hash)}")
+
+    print("\nAll blocks in the chain")
     for b in chain.blocks:
         print(f"\n{b}")
 
