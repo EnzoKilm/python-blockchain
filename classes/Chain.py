@@ -13,22 +13,41 @@ class Chain:
         self.last_transaction_number = 0
 
     def generate_hash(self):
-        letters = string.printable
-        index = random.randint(1, 101)
+        """ OLD HASH GENERATION METHOD """
+        # letters = string.printable
+        # index = random.randint(1, 101)
+        #
+        # random_string = ''
+        # for i in range(index):
+        #     random_string = random_string.join(random.choice(letters))
+        #
+        # new_hash = hashlib.sha256(random_string.encode()).hexdigest()
+        #
+        # if self.verify_hash(new_hash):
+        #     if self.add_block(random_string, new_hash) is False:
+        #         return "The hash does not match to the string given."
+        #     else:
+        #         return "Block successfully created."
+        # else:
+        #     return self.generate_hash()
 
-        random_string = ''
-        for i in range(index):
-            random_string = random_string.join(random.choice(letters))
+        print("Searching for a new hash")
 
-        new_hash = hashlib.sha256(random_string.encode()).hexdigest()
+        """ NEW HASH GENERATION METHOD """
+        index = 0
+        new_hash = hashlib.sha256(str(index).encode()).hexdigest()
+        while not new_hash.startswith("0000"):
+            index += 1
+            new_hash = hashlib.sha256(str(index).encode()).hexdigest()
 
-        if self.verify_hash(new_hash):
-            if self.add_block(random_string, new_hash) is False:
-                return "The hash does not match to the string given."
-            else:
-                return "Block successfully created."
-        else:
-            return self.generate_hash()
+            if new_hash.startswith("0000"):
+                if self.verify_hash(new_hash):
+                    if self.add_block(str(index), new_hash) is False:
+                        return "The hash does not match to the string given."
+                    else:
+                        return "Block successfully created."
+                else:
+                    new_hash = ""
 
     def verify_hash(self, hash_to_verify):
         if not hash_to_verify.startswith("0"):

@@ -20,9 +20,6 @@ def main():
     print("\nWallet 1: ", wallet1.balance)
     print("Wallet 2: ", wallet2.balance)
 
-    for b in chain.blocks:
-        print(f"\n{b}")
-
     print(f"\nLast transaction number: {chain.get_last_transaction_number()}")
 
     print(f"\n{chain.find_transaction(1)}")
@@ -30,8 +27,9 @@ def main():
     result = chain.generate_hash()
     print(result)
 
+    for b in chain.blocks:
+        print(f"\n{b}")
+
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(999999999)
-
     main()
